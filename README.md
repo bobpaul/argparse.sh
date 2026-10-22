@@ -134,8 +134,12 @@ Functions for parsing arguments:
 * `parse_args`
   * Arguments:
     - None
+* `args_init`
+  * Arguments:
+    - `"${args[@]}"`
 
 Set `HELP_WIDTH` (before calling `parse_args`) to set the column width of the help message.
+Set `PERMUTING=0 to set non-permuting mode (options must preceed positional arguments).
 
 Additional helper functions and variables:
 

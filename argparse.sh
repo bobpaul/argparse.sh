@@ -94,6 +94,11 @@
 # * parse_args
 #   - This is a required step and must be run after registering all your variables with argparse.sh.
 #
+# * arg_init
+#   - Initializes argparser.sh's internal variables. Automatically called with "$@" when sourcing
+#   - Call with a custom list of arguments to create a new parser in the same script
+#   - Does NOT unset ARG_${MYOPTION} variables from previous parser runs, but subsequent
+#     calls to parse_args might overwrite when arguments have conflicting names
 #
 # Other methods and variables that will become available to you:
 #
@@ -134,27 +139,33 @@ if [[ ${BASH_SOURCE[0]} == $0 ]]; then
   exit 1
 fi
 
-ARGS_ARR=("$@")
 
-POSITIONAL=()
-POSITIONAL_NAMES=()
-POSITIONAL_DESCRIPTIONS=()
+: ${PERMUTING:=1}
 
-UNPARSED=()
+arg_init() {
 
-BOOLEAN_NAMES=()
-BOOLEAN_FLAGS=()
-BOOLEAN_DESCRIPTIONS=()
+  ARGS_ARR=("$@")
+  POSITIONAL=()
+  POSITIONAL_NAMES=()
+  POSITIONAL_DESCRIPTIONS=()
 
-OPTIONAL_NAMES=()
-OPTIONAL_FLAGS=()
-OPTIONAL_DESCRIPTIONS=()
+  UNPARSED=()
 
-ARRAY_NAMES=()
-ARRAY_FLAGS=()
-ARRAY_DESCRIPTIONS=()
+  BOOLEAN_NAMES=()
+  BOOLEAN_FLAGS=()
+  BOOLEAN_DESCRIPTIONS=()
 
-HELP_DESCRIPTION=
+  OPTIONAL_NAMES=()
+  OPTIONAL_FLAGS=()
+  OPTIONAL_DESCRIPTIONS=()
+
+  ARRAY_NAMES=()
+  ARRAY_FLAGS=()
+  ARRAY_DESCRIPTIONS=()
+
+  HELP_DESCRIPTION=
+}
+arg_init "$@"
 
 # Bold print.
 # @param text [String]
@@ -463,6 +474,10 @@ argparse.sh::parse_args() {
       eval "ARG_$name_upper[\${#ARG_$name_upper[@]}]=\$value"
     else
       POSITIONAL[${#POSITIONAL[@]}]=$key
+      if [[ $PERMUTING -eq 0 ]]; then
+        POSITIONAL+=( "$@" )
+        break
+      fi
     fi
   done
 
