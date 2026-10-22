@@ -143,6 +143,8 @@ Additional helper functions and variables:
   - Full path of the directory which contains the script.
 * `$__FILE__`
   - Full path of the script.
+* `${UNPARSED[@]}`
+  - Array of additional arguments not parsed by argparse.sh
 * `${POSITIONAL[@]}`
   - Array of every argument that is not a registered flag, in command-line order. This includes
     the values assigned to `arg_positional` arguments, which are taken from the front of it.

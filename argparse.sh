@@ -109,6 +109,9 @@
 #   - Array of every argument that is not a registered flag, in command-line order. This includes
 #     the values assigned to `arg_positional' arguments, which are taken from the front of it.
 #
+# * `${UNPARSED[@]}'
+#   - Array of arguments not parsed by argparse.sh
+#
 # * bprint
 #   - Print the text as bold, without a trailing newline
 #   - Example: bprint "Important!!"
@@ -136,6 +139,8 @@ ARGS_ARR=("$@")
 POSITIONAL=()
 POSITIONAL_NAMES=()
 POSITIONAL_DESCRIPTIONS=()
+
+UNPARSED=()
 
 BOOLEAN_NAMES=()
 BOOLEAN_FLAGS=()
@@ -469,6 +474,7 @@ argparse.sh::parse_args() {
   i=0; for pos_val in "${POSITIONAL[@]}"; do
     get_name_upper ${POSITIONAL_NAMES[$i]}
     export -n ARG_$name_upper="$pos_val"
+    [[ -z $name_upper ]] && UNPARSED+=($pos_val)
     : $((i++))
   done
 
