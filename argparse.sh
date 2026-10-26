@@ -87,7 +87,8 @@
 #
 # * arg_help
 #   - This is optional and will add the `-h' and `--help' flags as arguments to your script.
-#   - Usage example: arg_help "[My custom help message]"
+#   - Standard Usage example: arg_help "[My custom help message]"
+#   - Subcommand Usage example: arg_help "[subcommand] [Custom help message for '$0 subcommand']"
 #   - CLI example: ./myscript.sh -h
 #     All the commands you registered with argparse.sh will be printed to the console in a smart way.
 #
@@ -164,6 +165,7 @@ arg_init() {
   ARRAY_DESCRIPTIONS=()
 
   HELP_DESCRIPTION=
+  HELP_COMMAND=
 }
 arg_init "$@"
 
@@ -182,8 +184,9 @@ impossible_match_pat='$.^'
 optional_space_pat='([[:space:]]+)?'
 arg_name_pat='([0-9A-Za-z_-]{2,})'
 arg_flag_pat='([[:alnum:]]{1,2})'
-arg_help_pat='(\[(.*)\])'
+arg_help_pat='\[([^]]+)\]'
 arg_positional_pat="\[${arg_name_pat}\]${optional_space_pat}${arg_help_pat}?"
+two_arg_help_pat="${arg_help_pat}${optional_space_pat}${arg_help_pat}"
 three_arg_pat="\[${arg_name_pat}?\]?${optional_space_pat}\[?${arg_flag_pat}?\]${optional_space_pat}${arg_help_pat}?"
 
 # @param arg_name
@@ -191,7 +194,7 @@ three_arg_pat="\[${arg_name_pat}?\]?${optional_space_pat}\[?${arg_flag_pat}?\]${
 arg_positional() {
   if [[ "$@" =~ $arg_positional_pat ]]; then
     POSITIONAL_NAMES[${#POSITIONAL_NAMES[@]}]=${BASH_REMATCH[1]}
-    POSITIONAL_DESCRIPTIONS[${#POSITIONAL_DESCRIPTIONS[@]}]=${BASH_REMATCH[4]}
+    POSITIONAL_DESCRIPTIONS[${#POSITIONAL_DESCRIPTIONS[@]}]=${BASH_REMATCH[3]}
   fi
 }
 
@@ -206,7 +209,7 @@ arg_boolean() {
     opt_flag=${BASH_REMATCH[3]}
     BOOLEAN_NAMES[${#BOOLEAN_NAMES[@]}]=$opt_name
     BOOLEAN_FLAGS[${#BOOLEAN_FLAGS[@]}]=$opt_flag
-    BOOLEAN_DESCRIPTIONS[${#BOOLEAN_DESCRIPTIONS[@]}]=${BASH_REMATCH[6]}
+    BOOLEAN_DESCRIPTIONS[${#BOOLEAN_DESCRIPTIONS[@]}]=${BASH_REMATCH[5]}
 
     export -n _ARG_${opt_flag:-${opt_name//-/_}}_NAME=${opt_name:-$opt_flag}
     long_flag_regex+="(${opt_name:-$impossible_match_pat})|"
@@ -225,7 +228,7 @@ arg_optional() {
     opt_flag=${BASH_REMATCH[3]}
     OPTIONAL_NAMES[${#OPTIONAL_NAMES[@]}]=$opt_name
     OPTIONAL_FLAGS[${#OPTIONAL_FLAGS[@]}]=$opt_flag
-    OPTIONAL_DESCRIPTIONS[${#OPTIONAL_DESCRIPTIONS[@]}]=${BASH_REMATCH[6]}
+    OPTIONAL_DESCRIPTIONS[${#OPTIONAL_DESCRIPTIONS[@]}]=${BASH_REMATCH[5]}
 
     export -n _ARG_${opt_flag:-${opt_name//-/_}}_NAME=${opt_name:-$opt_flag}
     long_opt_regex+="(${opt_name:-$impossible_match_pat})|"
@@ -244,7 +247,7 @@ arg_array() {
     opt_flag=${BASH_REMATCH[3]}
     ARRAY_NAMES[${#ARRAY_NAMES[@]}]=$opt_name
     ARRAY_FLAGS[${#ARRAY_FLAGS[@]}]=$opt_flag
-    ARRAY_DESCRIPTIONS[${#ARRAY_DESCRIPTIONS[@]}]=${BASH_REMATCH[6]}
+    ARRAY_DESCRIPTIONS[${#ARRAY_DESCRIPTIONS[@]}]=${BASH_REMATCH[5]}
 
     export -n _ARG_${opt_flag:-${opt_name//-/_}}_NAME=${opt_name:-$opt_flag}
     long_arr_regex+="(${opt_name:-$impossible_match_pat})|"
@@ -254,8 +257,11 @@ arg_array() {
 
 # @param arg_description
 arg_help() {
-  if [[ "$@" =~ $arg_help_pat ]]; then
-    HELP_DESCRIPTION=${BASH_REMATCH[2]}
+  if [[ "$@" =~ $two_arg_help_pat ]]; then
+    HELP_COMMAND=" ${BASH_REMATCH[1]}"
+    HELP_DESCRIPTION=${BASH_REMATCH[3]}
+  elif [[ "$@" =~ $arg_help_pat ]]; then
+    HELP_DESCRIPTION=${BASH_REMATCH[1]}
   fi
   BOOLEAN_NAMES[${#BOOLEAN_NAMES[@]}]=help
   BOOLEAN_FLAGS[${#BOOLEAN_FLAGS[@]}]=h
@@ -505,7 +511,7 @@ print_help() {
   local X_OPT_NL=$(($HELP_WIDTH - 3))
   local opt_flag opt_name flag_disp printf_s var
   bprint 'usage:'
-  printf_s="  ${0##*/} "
+  printf_s="  ${0##*/}${HELP_COMMAND} "
   for p_name in "${POSITIONAL_NAMES[@]}"; do
     printf_s+="[$p_name] "
   done

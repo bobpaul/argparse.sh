@@ -38,7 +38,7 @@ start(){
   #[[ -n $ARG_INIT  ]] && arg_init "$@" || source "${0%/*}/../argparse.sh"
   #source "${0%/*}/../argparse.sh"
   arg_init "$@"
-  arg_help       "[Start the daemon]"
+  arg_help       "[start] [Start the daemon]"
   arg_positional "[daemon]               [(optional) daemon to start (default: $ARG_DAEMON)]"
   arg_boolean    "[sudo]             [s] [use sudo]"
   arg_boolean    "[wait]             [w] [wait for service to start]"
@@ -62,7 +62,7 @@ EOT
 
 reload(){
   [[ -n $ARG_INIT  ]] && arg_init "$@" || source "${0%/*}/../argparse.sh"
-  arg_help        "[Reloads the daemon configuration without restarting]"
+  arg_help       "[reload] [Reload the daemon configuration without restarting]"
   arg_positional "[daemon][(optional) daemon to reload (default: $ARG_DAEMON)]"
   arg_boolean    "[verbose]        [v] [Do verbose output]"
   arg_boolean    "[restart]        [r] [Restart anyway]"
@@ -96,7 +96,7 @@ case $ARG_COMMAND in
   stop) 
     # functions are not required for subcommands
     arg_init "${UNPARSED[@]}"
-    arg_help       "[Stops the daemon]"
+    arg_help       "[stop] [Stop the daemon]"
     arg_positional "[daemon][(optional) daemon to stop (default: $ARG_DAEMON)]"
     arg_boolean    "[verbose]        [V] [Do verbose output]"
     arg_optional   "[message]        [m] [reason for stopping]"

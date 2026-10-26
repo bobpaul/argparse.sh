@@ -51,7 +51,8 @@ awk -F "$ARG_DELIMITER" "{print $ARG_EXPRESSION}" "$ARG_INPUT_FILE"
 ```
 
 To get a better idea of the usage in a real shell script, look at
-[advanced-usage-example.sh](https://github.com/maneyko/argparse.sh/blob/master/examples/advanced-usage-example.sh).
+[advanced-usage-example.sh](https://github.com/maneyko/argparse.sh/blob/master/examples/advanced-usage-example.sh) and
+[subcommands-example.sh](https://github.com/maneyko/argparse.sh/blob/master/examples/subcommands-example.sh).
 The script may be called like this (note that some default values are defined):
 
 ```bash
@@ -130,6 +131,7 @@ Functions for parsing arguments:
     - `arg_description`
 * `arg_help`
   * Arguments:
+    - `help_command`
     - `arg_description`
 * `parse_args`
   * Arguments:
